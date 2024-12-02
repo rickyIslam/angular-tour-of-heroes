@@ -24,10 +24,15 @@ jobs:
 
       - name: Build Angular Project
         run: npm run build --if-present
-
-      - name: Upload Build Artifacts
-        if: success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: angular-dist
-          path: dist/
+        
+      - name: Upload Build Artifacts to Remote PC
+        env:
+          REMOTE_PC_IP: ${{ secrets.REMOTE_PC_IP }}
+          REMOTE_PC_USER: ${{ secrets.REMOTE_PC_USER }}
+          REMOTE_PC_SSH_KEY: ${{ secrets.REMOTE_PC_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "${REMOTE_PC_SSH_KEY}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -o StrictHostKeyChecking=no -r dist/* ${REMOTE_PC_USER}@${REMOTE_PC_IP}:/C:\temp
+          
